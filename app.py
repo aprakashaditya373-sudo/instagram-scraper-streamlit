@@ -14,7 +14,7 @@ from zipfile import ZipFile
 # -------------------------------
 # GitHub Repo Details
 # -------------------------------
-REPO = "AP07AP/instagram-scraper-streamlit"
+REPO = "aprakashaditya373-sudo/instagram-scraper-streamlit"
 WORKFLOW_ID = "scraper.yml"
 GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"]
 ARTIFACT_NAME = "scraped_data"  # fallback name
