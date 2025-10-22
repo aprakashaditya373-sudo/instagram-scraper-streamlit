@@ -1,0 +1,13 @@
+streamlit>=1.50.0
+pandas>=2.0.0
+selenium>=4.36.0
+numpy
+transformers
+torch
+torchvision
+torchaudio
+requests
+emoji
+tqdm
+openpyxl
+plotly
