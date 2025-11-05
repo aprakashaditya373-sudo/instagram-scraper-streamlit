@@ -12,79 +12,9 @@ from selenium.webdriver.chrome.options import Options
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.keys import Keys
+import json
 
 sys.stdout.reconfigure(encoding='utf-8')
-
-# --------------------------
-# LOGIN VIA USERNAME / PASSWORD
-# --------------------------
-def human_typing(element, text, delay_min=0.02, delay_max=0.14):
-    for ch in text:
-        element.send_keys(ch)
-        time.sleep(random.uniform(delay_min, delay_max))
-
-def login_with_credentials(driver, wait, username, password):
-    try:
-        driver.get("https://www.instagram.com/accounts/login/")
-        # wait for username field
-        user_input = wait.until(EC.presence_of_element_located((By.NAME, "username")))
-        pass_input = wait.until(EC.presence_of_element_located((By.NAME, "password")))
-
-        # clear and type with human-like delays
-        user_input.clear()
-        human_typing(user_input, username)
-        time.sleep(random.uniform(0.5, 1.2))
-        pass_input.clear()
-        human_typing(pass_input, password)
-        time.sleep(random.uniform(0.5, 1.0))
-
-        # submit
-        pass_input.send_keys(Keys.ENTER)
-
-        # Wait for login success
-        logged_in = False
-        try:
-            WebDriverWait(driver, 15).until(
-                EC.presence_of_element_located((By.XPATH, "//input[@placeholder='Search']"))
-            )
-            logged_in = True
-        except Exception:
-            try:
-                WebDriverWait(driver, 15).until(
-                    EC.presence_of_element_located((By.XPATH, "//nav"))
-                )
-                logged_in = True
-            except Exception:
-                logged_in = False
-
-        if logged_in:
-            print("✅ Logged in via credentials")
-            time.sleep(3)
-            return True
-
-        # Check for challenge / 2FA
-        try:
-            challenge = driver.find_elements(By.XPATH, "//*[contains(text(),'challenge') or contains(text(),'Confirm')]")
-            if challenge:
-                print("⚠️ Instagram challenge detected (checkpoint). Manual intervention required.")
-                return False
-        except Exception:
-            pass
-
-        if "two-factor" in driver.page_source.lower() or "two factor" in driver.page_source.lower():
-            print("⚠️ Two-factor auth detected. Unable to proceed in fully automated mode.")
-            return False
-
-        print("⚠️ Login probably failed. Page title:", driver.title)
-        driver.save_screenshot("login_failed.png")
-        return False
-
-    except Exception as e:
-        print("⚠️ Exception during login:", e)
-        driver.save_screenshot("login_exception.png")
-        return False
-
 
 def scrape_instagram(profile_url, start_date, end_date, username=None):
     # Generate output filename dynamically
@@ -102,7 +32,9 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     
+    # ------------------------
     # PERFORMANCE OPTIMIZATIONS
+    # ------------------------
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--disable-extensions")
@@ -120,26 +52,54 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
     chrome_options.add_argument("--disable-hang-monitor")
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_experimental_option("prefs", {
-        "profile.default_content_setting_values.images": 2,
-        "profile.managed_default_content_settings.stylesheets": 2,
-        "profile.managed_default_content_settings.javascript": 1,
+        "profile.default_content_setting_values.images": 2,  # disable images
+        "profile.managed_default_content_settings.stylesheets": 2,  # disable CSS
+        "profile.managed_default_content_settings.javascript": 1,  # keep JS for functionality
         "profile.default_content_setting_values.cookies": 1,
         "profile.block_third_party_cookies": True,
     })
 
     # Initialize Chrome driver
-    service = Service()
+    service = Service()  # Add path if chromedriver not in PATH
     driver = webdriver.Chrome(service=service, options=chrome_options)
+    # driver = uc.Chrome(options=chrome_options)
     wait = WebDriverWait(driver, 10)
 
-    # LOGIN
-    login_success = login_with_credentials(driver, wait, "adiadiadi1044", "Heybro@")
-    if not login_success:
+    # Open Instagram main page
+    driver.get("https://www.instagram.com/")
+    print("🔄 Opening Instagram...")
+    time.sleep(5)
+
+    # ------------------------
+    # Login via hardcoded cookies
+    # ------------------------
+    try:
+        cookies = [
+            {"name": "csrftoken", "value": "Rf5IkDkC5ToB7WLxwBJXqBsEhhtacnYH", "domain": ".instagram.com", "path": "/"},
+            {"name": "datr",      "value": "BYzwaMODPk1FrOWDRvKdP-MI", "domain": ".instagram.com", "path": "/"},
+            {"name": "dpr",       "value": "1.25", "domain": ".instagram.com", "path": "/"},
+            {"name": "ds_user_id","value": "72782729777", "domain": ".instagram.com", "path": "/"},
+            {"name": "ig_did",    "value": "356B55F2-C173-46CA-BF6B-B6A34260D7AD", "domain": ".instagram.com", "path": "/"},
+            {"name": "mid",       "value": "aPCMBQALAAEuhO8RpUZ7vfEg8cCZ", "domain": ".instagram.com", "path": "/"},
+            {"name": "rur",       "value": "CCO\\05472782729777\\0541792582265:01fed7f09310a7dd37f9fec22286bbc198afe6145f400200f80c6c0eb422bfcb5d3356d9", "domain": ".instagram.com", "path": "/"},
+            {"name": "sessionid", "value": "72782729777%3AXy000Mrq0Qnon7%3A3%3AAYgxnnMw8vAY39iGTTPeI3eoN9hZkwUZ4HKEP3my2A", "domain": ".instagram.com", "path": "/"},
+            {"name": "wd",        "value": "679x730", "domain": ".instagram.com", "path": "/"},
+        ]
+
+        for cookie in cookies:
+            driver.add_cookie(cookie)
+
+        driver.refresh()
+        time.sleep(5)
+        print("✅ Logged in via hardcoded cookies, no CAPTCHA!")
+    except Exception as e:
+        print(f"⚠️ Error loading cookies: {e}")
         driver.quit()
         return
 
     # Navigate to profile
     time.sleep(5)
+    # ✅ Normalize profile input
     if not profile_url.startswith("http"):
         profile_url = f"https://www.instagram.com/{profile_url.strip().strip('/')}/"
     driver.get(profile_url)
@@ -200,21 +160,45 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
             all_comments_data = []
             if datetime_obj and start_dt.date() <= datetime_obj.date() <= end_dt.date():
                 try:
-                    comments_container = WebDriverWait(driver, 10).until(
-                        EC.presence_of_element_located((By.XPATH, '//ul/div/li/div/div/div[2]/div[1]/span'))
-                    )
+                    if post_count == 1:
+                        try:
+                            comments_container = WebDriverWait(driver, 10).until(
+                                EC.presence_of_element_located((By.XPATH, '/html/body/div[5]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/div[1]/ul/div[3]/div/div'))
+                            )
+                            caption_elem = comments_container.find_element(By.XPATH, '/html/body/div[5]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/div[1]/ul/div[1]/li/div/div/div[2]/div[1]/h1')
+                        except Exception:
+                            comments_container = WebDriverWait(driver, 10).until(
+                                EC.presence_of_element_located((By.XPATH, '/html/body/div[4]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/div[1]/ul/div[3]/div/div'))
+                            )
+                            caption_elem = comments_container.find_element(By.XPATH, '/html/body/div[4]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/div[1]/ul/div[1]/li/div/div/div[2]/div[1]/h1')
+                    else:
+                        try:
+                            comments_container = WebDriverWait(driver, 10).until(
+                                EC.presence_of_element_located((By.XPATH, '/html/body/div[4]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/div[1]/ul/div[3]/div/div'))
+                            )
+                            caption_elem = comments_container.find_element(By.XPATH, '/html/body/div[4]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/div[1]/ul/div[1]/li/div/div/div[2]/div[1]/h1')
+                        except Exception:
+                            comments_container = WebDriverWait(driver, 10).until(
+                                EC.presence_of_element_located((By.XPATH, '/html/body/div[5]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/div[1]/ul/div[3]/div/div'))
+                            )
+                            caption_elem = comments_container.find_element(By.XPATH, '/html/body/div[5]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/div[1]/ul/div[1]/li/div/div/div[2]/div[1]/h1')
+
+                    print(f"✅ Comments container found for Post {post_count}")
+                    # Caption
                     try:
-                        caption_elem = driver.find_element(By.XPATH, '//div[@role="dialog"]//div[contains(@class,"C4VMK")]/span')
+                        # caption_elem = comments_container.find_element(By.XPATH, '/html/body/div[4]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/div[1]/ul/div[1]/li/div/div/div[2]/div[1]/h1')
                         caption_text = caption_elem.text.strip()
                         all_comments_data.append(caption_text)
                         print(f"📝 Caption: {caption_text}")
-                    except Exception:
+                    except NoSuchElementException:
                         pass
+
                     # Load comments
                     prev_count = 0
                     while True:
-                        comment_blocks = comments_container.find_elements(By.XPATH, './li/div/div/div[2]/div[1]/span')
+                        comment_blocks = comments_container.find_elements(By.XPATH, './div[position()>=0]/ul/div/li/div/div/div[2]/div[1]/span')
                         current_count = len(comment_blocks)
+
                         for comment_elem in comment_blocks[prev_count:]:
                             try:
                                 comment_text = comment_elem.text.strip()
@@ -222,9 +206,11 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
                                 print(f"💬 Comment: {comment_text}")
                             except Exception:
                                 continue
+
                         if current_count == prev_count:
                             break
                         prev_count = current_count
+
                         try:
                             load_more_btn = comments_container.find_element(By.XPATH, './li/div/button')
                             driver.execute_script("arguments[0].click();", load_more_btn)
@@ -236,7 +222,7 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
             else:
                 print(f"⏭ Post {post_count} skipped: date {date_posted} not in range.")
 
-            # Save post data
+            # Save post data (added hashtag separation here)
             first_row = True
             raw_caption = all_comments_data[0] if all_comments_data else ""
             if raw_caption:
@@ -264,9 +250,7 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
 
             # Next post
             try:
-                next_btn = WebDriverWait(driver, 5).until(
-                    EC.element_to_be_clickable((By.XPATH, '//div[contains(@class, "_aaqg") and contains(@class, "_aaqh")]//button[contains(@class, "_abl-")]'))
-                )
+                next_btn = wait.until(EC.element_to_be_clickable((By.XPATH, '//div[contains(@class, "_aaqg") and contains(@class, "_aaqh")]//button[contains(@class, "_abl-")]')))
                 driver.execute_script("arguments[0].click();", next_btn)
                 time.sleep(random.uniform(3, 5))
             except TimeoutException:
@@ -291,9 +275,12 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
 
 # -------------------------
 # CLI Run (multi-profile, single output file)
-# -------------------------
+
 from concurrent.futures import ThreadPoolExecutor, as_completed
 if __name__ == "__main__":
+    import sys
+    import os
+
     if len(sys.argv) < 6:
         print("Usage: python scraper.py <profile_url(s) comma-separated> <start_date> <end_date> <username> <artifact_name>")
         sys.exit(1)
