@@ -28,7 +28,7 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_argument("--start-maximized")
-    chrome_options.add_argument("--headless=new")
+    # chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     
@@ -106,8 +106,11 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
     print("✅ Profile page loaded")
     time.sleep(5)
 
-    # Click first post
-    first_post_xpath = '/html/body/div[1]/div/div/div[2]/div/div/div[1]/div[2]/div[1]/section/main/div/div/div[2]/div/div/div/div/div[1]/div[1]/a'
+    # Click first post      
+    first_post_xpath = '/html/body/div[1]/div/div/div[2]/div/div/div[1]/div[2]/div[2]/section/main/div/div/div[2]/div/div/div/div/div[1]/div[1]/a'
+    # first_post_xpath = '/html/body/div[1]/div/div/div[2]/div/div/div[1]/div[2]/div[2]/section/main/div/div/div[2]/div/div/div/div/div[1]/div[1]'
+    # first_post_xpath = "a.x1i10hfl.xjbqb8w.x1ejq31n.x18oe1m7.x1sy0etr.xstzfhl.x972fbf.x10w94by.x1qhh985.x14e42zd.x9f619.x1ypdohk.xt0psk2.x3ct3a4.xdj266r.x14z9mp.xat24cr.x1lziwak.xexx8yu.xyri2b.x18d9i69.x1c1uobl.x16tdsg8.x1hl2dhg.xggy1nq.x1a2a7pz._a6hd"
+
     try:
         first_post = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.XPATH, first_post_xpath))
@@ -137,6 +140,7 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
 
             # Date
             try:
+                # date_element = driver.find_element(By.XPATH, '//time')
                 date_element = driver.find_element(By.XPATH, '//time')
                 datetime_str = date_element.get_attribute("datetime")
                 datetime_obj = datetime.fromisoformat(datetime_str.replace("Z", "+00:00"))
