@@ -28,7 +28,7 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
     chrome_options.add_argument("--disable-blink-features=AutomationControlled")
     chrome_options.add_argument("--disable-notifications")
     chrome_options.add_argument("--start-maximized")
-    chrome_options.add_argument("--headless=new")
+    # chrome_options.add_argument("--headless=new")
     chrome_options.add_argument("--disable-gpu")
     chrome_options.add_argument("--window-size=1920,1080")
     
