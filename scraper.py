@@ -75,15 +75,15 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
     # ------------------------
     try:
         cookies = [
-            {"name": "csrftoken", "value": "Rf5IkDkC5ToB7WLxwBJXqBsEhhtacnYH", "domain": ".instagram.com", "path": "/"},
+            {"name": "csrftoken", "value": "bMpnP6wxDxhEY7dvyovVr7MQpoToKtDU", "domain": ".instagram.com", "path": "/"},
             {"name": "datr",      "value": "BYzwaMODPk1FrOWDRvKdP-MI", "domain": ".instagram.com", "path": "/"},
             {"name": "dpr",       "value": "1.25", "domain": ".instagram.com", "path": "/"},
             {"name": "ds_user_id","value": "72782729777", "domain": ".instagram.com", "path": "/"},
             {"name": "ig_did",    "value": "356B55F2-C173-46CA-BF6B-B6A34260D7AD", "domain": ".instagram.com", "path": "/"},
             {"name": "mid",       "value": "aPCMBQALAAEuhO8RpUZ7vfEg8cCZ", "domain": ".instagram.com", "path": "/"},
-            {"name": "rur",       "value": "CCO\\05472782729777\\0541792582265:01fed7f09310a7dd37f9fec22286bbc198afe6145f400200f80c6c0eb422bfcb5d3356d9", "domain": ".instagram.com", "path": "/"},
-            {"name": "sessionid", "value": "72782729777%3AXy000Mrq0Qnon7%3A3%3AAYgxnnMw8vAY39iGTTPeI3eoN9hZkwUZ4HKEP3my2A", "domain": ".instagram.com", "path": "/"},
-            {"name": "wd",        "value": "679x730", "domain": ".instagram.com", "path": "/"},
+            {"name": "rur",       "value": "CCO\05472782729777\0541801380319:01fe1f9ac4ae3c36b9846041754eeafc2efe0c05e6525e983405e2ae6c522b4c2e552678", "domain": ".instagram.com", "path": "/"},
+            {"name": "sessionid", "value": "72782729777%3AbgAPAqZK1POmna%3A26%3AAYgsjyJZ00dRx948maKIToFL50pv5QJbTuRQGYQDmA", "domain": ".instagram.com", "path": "/"},
+            {"name": "wd",        "value": "150x730", "domain": ".instagram.com", "path": "/"},
         ]
 
         for cookie in cookies:
