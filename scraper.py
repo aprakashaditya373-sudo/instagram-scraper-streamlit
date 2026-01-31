@@ -107,7 +107,8 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
     time.sleep(5)
 
     # Click first post
-    first_post_xpath = '/html/body/div[1]/div/div/div[2]/div/div/div[1]/div[2]/div[1]/section/main/div/div/div[2]/div/div/div/div/div[1]/div[1]/a'
+    first_post_xpath = '//*[@id="mount_0_0_/L"]/div/div/div[2]/div/div/div[1]/div[2]/div[2]/section/main/div/div/div[2]/div/div/div/div/div[1]/div[1]/a'
+    # '/html/body/div[1]/div/div/div[2]/div/div/div[1]/div[2]/div[1]/section/main/div/div/div[2]/div/div/div/div/div[1]/div[1]/a'
     try:
         first_post = WebDriverWait(driver, 20).until(
             EC.element_to_be_clickable((By.XPATH, first_post_xpath))
