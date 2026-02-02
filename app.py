@@ -71,7 +71,7 @@ def fetch_artifact_csv(repo, token, artifact_name=ARTIFACT_NAME):
 
     # Wait for artifact to appear (max 2 mins)
     artifact_found = False
-    for _ in range(600):
+    for _ in range(6000):
         artifacts = requests.get(f"https://api.github.com/repos/{repo}/actions/artifacts", headers=headers).json().get("artifacts", [])
         if any(a["name"] == artifact_name for a in artifacts):
             artifact_found = True
@@ -161,7 +161,7 @@ if scrape_clicked:
     st.info("⏳ Waiting for scraping to complete (up to 5 mins)...")
 
     workflow_completed = False
-    for _ in range(600):  # ~10 mins
+    for _ in range(6000):  # ~10 mins
         runs = requests.get(f"https://api.github.com/repos/{REPO}/actions/workflows/{WORKFLOW_ID}/runs", headers=headers).json()
         latest_run = runs.get("workflow_runs", [None])[0]
         if latest_run and latest_run.get("status") == "completed":
