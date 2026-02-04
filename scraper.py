@@ -156,7 +156,9 @@ def scrape_instagram(profile_url, start_date, end_date, username=None):
 
             # Likes
             try:
-                likes = driver.find_element(By.XPATH, '//section[2]/div/div/span/a/span/span').text
+                # likes = driver.find_element(By.XPATH, '//section[2]/div/div/span/a/span/span').text
+                likes = driver.find_element(By.XPATH, '/html/body/div[5]/div[1]/div/div[3]/div/div/div/div/div[2]/div/article/div/div[2]/div/div/div[2]/section[2]/div/div/span/div/span').text
+                
             except NoSuchElementException:
                 likes = "Hidden"
 
